@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
+// ---------------------- INTERFACES ----------------------
 interface UserSession {
   id: string;
   name?: string;
@@ -18,13 +18,6 @@ interface JWTPayload {
   exp?: number;
 }
 
-// Extend Express Request to allow req.user
-/*declare module 'express-serve-static-core' {
-  interface Request {
-    user?: JWTPayload;
-  }
-}
-*/
 // ---------------- GENERATE TOKEN ----------------
 export const generateToken = (user: UserSession, res: Response): void => {
   if (!process.env.JWT_SECRET) {
@@ -38,20 +31,20 @@ export const generateToken = (user: UserSession, res: Response): void => {
 
   // Set cookie with the token
   res.cookie('jwt', token, {
-    httpOnly: true, // safer: prevents JS access
-    secure: true, // cookie only sent over HTTPS
-    sameSite: 'none', // allow cross-site
+    httpOnly: true, // JS cannot access
+    secure: process.env.NODE_ENV === 'production', // ✅ only HTTPS in prod
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // ✅ cross-site cookies in prod
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
   console.log('✅ Token generated for user:', user.id);
 };
 
-// ---------------- VERIFY TOKEN or Middleware ----------------
+// ---------------- VERIFY TOKEN ----------------
 export const verifyToken = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void => {
   const token = req.cookies?.jwt;
 
@@ -68,8 +61,8 @@ export const verifyToken = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as JWTPayload;
-    (req as any).user = decoded; // attach user payload to Request
-    next(); //move to the route handler
+    (req as any).user = decoded; // attach user payload to request
+    next();
   } catch (error) {
     console.error('❌ Token verification error:', error);
     res.status(401).json({ error: 'Invalid or expired token.' });
@@ -83,8 +76,9 @@ export const degradeToken = (res: Response): void => {
       maxAge: 0,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
+    console.log('✅ User logged out');
   } catch (error) {
     console.error('❌ Logout error:', error);
     res.status(500).json({ message: 'Unsuccessful logout' });

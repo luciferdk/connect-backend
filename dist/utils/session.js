@@ -7,13 +7,6 @@ exports.degradeToken = exports.verifyToken = exports.generateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-// Extend Express Request to allow req.user
-/*declare module 'express-serve-static-core' {
-  interface Request {
-    user?: JWTPayload;
-  }
-}
-*/
 // ---------------- GENERATE TOKEN ----------------
 const generateToken = (user, res) => {
     if (!process.env.JWT_SECRET) {
@@ -25,15 +18,15 @@ const generateToken = (user, res) => {
     });
     // Set cookie with the token
     res.cookie('jwt', token, {
-        httpOnly: true, // safer: prevents JS access
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        httpOnly: true, // JS cannot access
+        secure: process.env.NODE_ENV === 'production', // ✅ only HTTPS in prod
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // ✅ cross-site cookies in prod
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
     console.log('✅ Token generated for user:', user.id);
 };
 exports.generateToken = generateToken;
-// ---------------- VERIFY TOKEN or Middleware ----------------
+// ---------------- VERIFY TOKEN ----------------
 const verifyToken = (req, res, next) => {
     var _a;
     const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.jwt;
@@ -48,8 +41,8 @@ const verifyToken = (req, res, next) => {
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // attach user payload to Request
-        next(); //move to the route handler
+        req.user = decoded; // attach user payload to request
+        next();
     }
     catch (error) {
         console.error('❌ Token verification error:', error);
@@ -64,8 +57,9 @@ const degradeToken = (res) => {
             maxAge: 0,
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         });
+        console.log('✅ User logged out');
     }
     catch (error) {
         console.error('❌ Logout error:', error);
