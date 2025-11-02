@@ -8,7 +8,7 @@ let isInitialized = false;
 export const setupSocket = (server: HTTPServer) => {
 io = new Server(server, {
     cors: {
-      origin: 'http:0.0.0.0:3000',
+      origin: 'https://connect.x-dev.site',
       credentials: true,
       methods: ['GET', 'POST'],
     },

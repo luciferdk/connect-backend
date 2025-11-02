@@ -49,7 +49,9 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             where: { id: userId },
             data: updateData,
         });
-        res.status(200).json({ message: 'Profile updated successfully', user: updatedUser });
+        res
+            .status(200)
+            .json({ message: 'Profile updated successfully', user: updatedUser });
     }
     catch (error) {
         console.error('Error updating profile:', error);
@@ -80,11 +82,13 @@ const contactName = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 ownerId_contactId: {
                     ownerId,
                     contactId: contactUser.id,
-                }
-            }
+                },
+            },
         });
         if (!existingContact) {
-            res.status(404).json({ message: 'Contact not found in your contact list' });
+            res
+                .status(404)
+                .json({ message: 'Contact not found in your contact list' });
             return;
         }
         // Update the contact's nickname
@@ -93,7 +97,7 @@ const contactName = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 ownerId_contactId: {
                     ownerId,
                     contactId: contactUser.id,
-                }
+                },
             },
             data: {
                 nickName: nickName,
@@ -106,7 +110,9 @@ const contactName = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         // Handle Prisma specific errors
         if (error instanceof Error) {
             if (error.message.includes('Record to update not found')) {
-                res.status(404).json({ message: 'Contact not found in your contact list' });
+                res
+                    .status(404)
+                    .json({ message: 'Contact not found in your contact list' });
                 return;
             }
         }

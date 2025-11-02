@@ -4,9 +4,10 @@ import { PrismaClient } from '../generated/prisma';
 
 const prisma = new PrismaClient();
 
-
-
-export const updateUser = async (req: Request, res: Response): Promise<void> => {
+export const updateUser = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const user = req.user as { id: string } | undefined; // cast user
     const userId = user?.id;
@@ -17,7 +18,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     }
 
     const { name, bio, profileUrl } = req.body;
-    const file = (req as any).file as Express.Multer.File | undefined;
+    const file = req.file;
 
     const updateData: {
       name?: string;
@@ -48,15 +49,19 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       data: updateData,
     });
 
-    res.status(200).json({ message: 'Profile updated successfully', user: updatedUser });
+    res
+      .status(200)
+      .json({ message: 'Profile updated successfully', user: updatedUser });
   } catch (error) {
     console.error('Error updating profile:', error);
     res.status(500).json({ message: 'Failed to update profile' });
   }
 };
 
-
-export const contactName = async (req: Request, res: Response): Promise<void> => {
+export const contactName = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const ownerId = req.user!.id;
     const { mobile, nickName } = req.body;
@@ -83,12 +88,14 @@ export const contactName = async (req: Request, res: Response): Promise<void> =>
         ownerId_contactId: {
           ownerId,
           contactId: contactUser.id,
-        }
-      }
+        },
+      },
     });
 
     if (!existingContact) {
-      res.status(404).json({ message: 'Contact not found in your contact list' });
+      res
+        .status(404)
+        .json({ message: 'Contact not found in your contact list' });
       return;
     }
 
@@ -98,7 +105,7 @@ export const contactName = async (req: Request, res: Response): Promise<void> =>
         ownerId_contactId: {
           ownerId,
           contactId: contactUser.id,
-        }
+        },
       },
       data: {
         nickName: nickName,
@@ -108,15 +115,17 @@ export const contactName = async (req: Request, res: Response): Promise<void> =>
     res.status(200).json(updatedContact);
   } catch (error) {
     console.error(error);
-    
+
     // Handle Prisma specific errors
     if (error instanceof Error) {
       if (error.message.includes('Record to update not found')) {
-        res.status(404).json({ message: 'Contact not found in your contact list' });
+        res
+          .status(404)
+          .json({ message: 'Contact not found in your contact list' });
         return;
       }
     }
-    
+
     res.status(500).json({ message: 'Failed to update contact name' });
   }
 };

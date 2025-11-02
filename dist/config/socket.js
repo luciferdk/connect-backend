@@ -16,7 +16,7 @@ let isInitialized = false;
 const setupSocket = (server) => {
     io = new socket_io_1.Server(server, {
         cors: {
-            origin: 'http:0.0.0.0:3000',
+            origin: 'https://connect.x-dev.site',
             credentials: true,
             methods: ['GET', 'POST'],
         },
