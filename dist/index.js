@@ -54,7 +54,7 @@ const PORT = Number(process.env.PORT);
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app); //Important: attach to server
 //middleware
-app.use((0, cors_1.default)({ origin: 'https://connect.x-dev.site', credentials: true }));
+app.use((0, cors_1.default)({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express_1.default.json({ limit: '100mb' }));
 app.use((0, cookie_parser_1.default)());
 // <- Routes ->

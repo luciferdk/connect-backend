@@ -8,7 +8,6 @@ import http from 'http';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-
 import authRoutes from './routes/routesAuth';
 import messagesRoutes from './routes/routesMessages';
 import profileRoutes from './routes/routesUpdate';
@@ -16,13 +15,12 @@ import addContactRoutes from './routes/routesContact';
 import deleteRoutes from './routes/routesDelete';
 import { setupSocket } from './config/socket';
 
-
 const PORT = Number(process.env.PORT);
 const app = express();
-const server = http.createServer(app);//Important: attach to server
+const server = http.createServer(app); //Important: attach to server
 
 //middleware
-app.use(cors({ origin:  'https://connect.x-dev.site', credentials: true }));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: '100mb' }));
 app.use(cookieParser());
 

@@ -59,16 +59,26 @@
 
 
 
-/* env file configration of credintial*/
-DATABASE_URL="POSTGRES-DATABASEurl"
-JWT_SECRET=JWT-SECREAT
-TWILIO_ACCOUNT_SID=TWILIO-ACCOUNT-SID
-TWILIO_AUTH_TOKEN=TWILIO-AUTH-TOKEN
-TWILIO_PHONE_NUMBER= +12705581431  # This is your Twilio verified sender number
-REDIS_URL=redisLabURL
+*** env file configration of credintial*/
 
 
-/*
+DATABASE_URL="postgres://avnadmin:AsdfdsT@pg-294bcd82-psotgraceaiven.l.aivencloud.com:21132/defaultdb?sslmode=require"
+
+NODE_ENV=production
+FRONTEND_URL=https://mydomain.com
+JWT_SECRET=huddgyeguru
+FAST2SMS_API_KEY=QEnCH31S1Dq243RE43545Y4WE3wU5sIB3P8JOEU6JEYoGjUbY0
+
+REDIS_URL=redis://default:XBKFsoPvT3si36@redis-12111.c240.us-east-1-3.cloud.com:12111
+
+CLOUDINARY_CLOUD_NAME=dg9wfsllxv5
+CLOUDINARY_API_SECRET=vutqljsjflr3rj54l3k654l54k
+CLOUDINARY_API_KEY=686535544635795
+
+
+PORT = 8080
+
+
 this is for local redis befor this install on you machine
 import { createClient } from 'redis';
 

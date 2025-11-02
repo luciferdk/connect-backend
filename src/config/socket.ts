@@ -1,6 +1,8 @@
 import { Server } from 'socket.io';
 import { Server as HTTPServer } from 'http';
+import dotenv from 'dotenv';
 
+dotenv.config();
 let io: Server;
 let isInitialized = false;
 
@@ -8,7 +10,7 @@ let isInitialized = false;
 export const setupSocket = (server: HTTPServer) => {
 io = new Server(server, {
     cors: {
-      origin: 'https://connect.x-dev.site',
+      origin: process.env.FRONTEND_URL,
       credentials: true,
       methods: ['GET', 'POST'],
     },
