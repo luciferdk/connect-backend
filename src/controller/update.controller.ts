@@ -1,15 +1,20 @@
+// src/controller/update.controller.ts
+
 import { Request, Response } from 'express';
 import cloudinary from '../config/cloudinary';
 import { PrismaClient } from '../generated/prisma';
+import streamifier from 'streamifier'; // 👈 helps convert buffer to stream
 
 const prisma = new PrismaClient();
 
+
+// ===================Update User Info Handler=================================
 export const updateUser = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
   try {
-    const user = req.user as { id: string } | undefined; // cast user
+    const user = req.user as { id: string } | undefined;
     const userId = user?.id;
 
     if (!userId) {
@@ -30,11 +35,36 @@ export const updateUser = async (
     if (bio?.trim()) updateData.bio = bio.trim();
 
     if (file) {
-      const uploadResult = await cloudinary.uploader.upload(file.path, {
-        folder: 'user_profiles',
-        resource_type: 'image',
-      });
-      updateData.profileUrl = uploadResult.secure_url;
+      // Upload directly from memory
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'user_profiles',
+          resource_type: 'image',
+        },
+        async (error, result) => {
+          if (error || !result) {
+            console.error('Cloudinary upload failed:', error);
+            res.status(500).json({ message: 'Failed to upload image' });
+            return;
+          }
+
+          updateData.profileUrl = result.secure_url;
+
+          const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+          });
+
+          res.status(200).json({
+            message: 'Profile updated successfully',
+            user: updatedUser,
+          });
+        },
+      );
+
+      // Convert buffer to stream and pipe it to Cloudinary
+      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      return; // prevent continuing before async callback
     } else if (profileUrl?.trim()) {
       updateData.profileUrl = profileUrl.trim();
     }
@@ -49,15 +79,17 @@ export const updateUser = async (
       data: updateData,
     });
 
-    res
-      .status(200)
-      .json({ message: 'Profile updated successfully', user: updatedUser });
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: updatedUser,
+    });
   } catch (error) {
     console.error('Error updating profile:', error);
     res.status(500).json({ message: 'Failed to update profile' });
   }
 };
 
+//=====================Update NickName Info Handler==========================
 export const contactName = async (
   req: Request,
   res: Response,
