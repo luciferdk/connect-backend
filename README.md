@@ -59,8 +59,8 @@
 
 
 
-*** env file configration of credintial*/
-
+*** env file configration of credintial ***
+```
 
 DATABASE_URL="postgres://avnadmin:AsdfdsT@pg-294bcd82-psotgraceaiven.l.aivencloud.com:21132/defaultdb?sslmode=require"
 
@@ -78,7 +78,7 @@ CLOUDINARY_API_KEY=686535544635795
 
 PORT = 8080
 
-
+```
 this is for local redis befor this install on you machine
 import { createClient } from 'redis';
 
