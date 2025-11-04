@@ -6,33 +6,41 @@ dotenv.config();
 let io: Server;
 let isInitialized = false;
 
+const onlineUsers = new Map<string, string>(); //userId -> socketId
 
 export const setupSocket = (server: HTTPServer) => {
-io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: process.env.FRONTEND_URL,
       credentials: true,
       methods: ['GET', 'POST'],
     },
   });
-isInitialized = true;
-
+  isInitialized = true;
 
   io.on('connection', (socket) => {
-    console.log('✅ A user Connected', socket.id);
+   // console.log('✅ A user Connected', socket.id);
 
     socket.on('join', async (userId: string) => {
+      onlineUsers.set(userId, socket.id);
       socket.join(userId);
-      console.log(`📦 User ${userId} joined room`);
+      //console.log(`📦 User ${userId} joined room`);
+
+      //notify everyone that this user is online
+      socket.broadcast.emit('user_online', userId);
+
+      socket.emit('online-users', Array.from(onlineUsers.keys())); //send lint of  current online user
     });
+    socket.on('disconnect', () => {
+      const disconnectedUserId = [...onlineUsers.entries()].find(
+        ([, sid]) => sid === socket.id,
+      )?.[0];
 
-    /*socket.on('send_message', ({ recipientId, message }) => {
-      io.to(recipientId).emit('recive_message', message); //send to recipient
-      io.to(message.senderId).emit('rececive_message', message); // send back to sender for confirmation
-    });*/
-
-    socket.on('❌ disconnect', () => {
-      console.log('A user disconnected', socket.id);
+      if (disconnectedUserId) {
+        onlineUsers.delete(disconnectedUserId);
+        socket.broadcast.emit('user_offline', disconnectedUserId);
+        //console.log(`❌ User user ${disconnectedUserId} went offline`);
+      }
     });
   });
 };

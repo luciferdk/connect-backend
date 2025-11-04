@@ -18,6 +18,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 let io;
 let isInitialized = false;
+const onlineUsers = new Map(); //userId -> socketId
 const setupSocket = (server) => {
     io = new socket_io_1.Server(server, {
         cors: {
@@ -28,17 +29,23 @@ const setupSocket = (server) => {
     });
     isInitialized = true;
     io.on('connection', (socket) => {
-        console.log('✅ A user Connected', socket.id);
+        // console.log('✅ A user Connected', socket.id);
         socket.on('join', (userId) => __awaiter(void 0, void 0, void 0, function* () {
+            onlineUsers.set(userId, socket.id);
             socket.join(userId);
-            console.log(`📦 User ${userId} joined room`);
+            //console.log(`📦 User ${userId} joined room`);
+            //notify everyone that this user is online
+            socket.broadcast.emit('user_online', userId);
+            socket.emit('online-users', Array.from(onlineUsers.keys())); //send lint of  current online user
         }));
-        /*socket.on('send_message', ({ recipientId, message }) => {
-          io.to(recipientId).emit('recive_message', message); //send to recipient
-          io.to(message.senderId).emit('rececive_message', message); // send back to sender for confirmation
-        });*/
-        socket.on('❌ disconnect', () => {
-            console.log('A user disconnected', socket.id);
+        socket.on('disconnect', () => {
+            var _a;
+            const disconnectedUserId = (_a = [...onlineUsers.entries()].find(([, sid]) => sid === socket.id)) === null || _a === void 0 ? void 0 : _a[0];
+            if (disconnectedUserId) {
+                onlineUsers.delete(disconnectedUserId);
+                socket.broadcast.emit('user_offline', disconnectedUserId);
+                //console.log(`❌ User user ${disconnectedUserId} went offline`);
+            }
         });
     });
 };
