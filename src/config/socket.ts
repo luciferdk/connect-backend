@@ -19,17 +19,16 @@ export const setupSocket = (server: HTTPServer) => {
   isInitialized = true;
 
   io.on('connection', (socket) => {
-   // console.log('✅ A user Connected', socket.id);
+    // console.log('✅ A user Connected', socket.id);
 
     socket.on('join', async (userId: string) => {
       onlineUsers.set(userId, socket.id);
       socket.join(userId);
-      //console.log(`📦 User ${userId} joined room`);
+      // console.log(`📦 User ${userId} joined room`);
 
       //notify everyone that this user is online
+      socket.emit('online_users', Array.from(onlineUsers.keys())); //send lint of  current online user
       socket.broadcast.emit('user_online', userId);
-
-      socket.emit('online-users', Array.from(onlineUsers.keys())); //send lint of  current online user
     });
     socket.on('disconnect', () => {
       const disconnectedUserId = [...onlineUsers.entries()].find(
