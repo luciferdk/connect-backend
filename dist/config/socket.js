@@ -33,10 +33,10 @@ const setupSocket = (server) => {
         socket.on('join', (userId) => __awaiter(void 0, void 0, void 0, function* () {
             onlineUsers.set(userId, socket.id);
             socket.join(userId);
-            //console.log(`📦 User ${userId} joined room`);
+            // console.log(`📦 User ${userId} joined room`);
             //notify everyone that this user is online
+            socket.emit('online_users', Array.from(onlineUsers.keys())); //send lint of  current online user
             socket.broadcast.emit('user_online', userId);
-            socket.emit('online-users', Array.from(onlineUsers.keys())); //send lint of  current online user
         }));
         socket.on('disconnect', () => {
             var _a;
