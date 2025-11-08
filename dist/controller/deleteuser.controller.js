@@ -12,8 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../generated/prisma");
 const prisma = new prisma_1.PrismaClient();
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const userId = req.params.id;
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized: User not found' });
+            return;
+        }
         yield prisma.message.deleteMany({
             where: {
                 OR: [{ senderId: userId }, { recipientId: userId }],
@@ -27,7 +32,7 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         yield prisma.user.delete({
             where: { id: userId },
         });
-        res.status(200).json({ message: 'user deleted Successfully' });
+        res.status(204).json({ message: 'user deleted Successfully' });
     }
     catch (error) {
         console.error(error, 'Deleting user Failed');
