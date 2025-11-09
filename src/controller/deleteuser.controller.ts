@@ -1,5 +1,7 @@
 import { PrismaClient } from '../generated/prisma';
 import { Request, Response } from 'express';
+import { degradeToken } from '../utils/session';
+
 const prisma = new PrismaClient();
 
 const deleteUser = async (req: Request, res: Response) => {
@@ -26,6 +28,10 @@ const deleteUser = async (req: Request, res: Response) => {
     await prisma.user.delete({
       where: { id: userId },
     });
+
+    // Degrade token after deleting user
+    degradeToken(res);
+
     res.status(204).json({ message: 'user deleted Successfully' });
   } catch (error) {
     console.error(error, 'Deleting user Failed');

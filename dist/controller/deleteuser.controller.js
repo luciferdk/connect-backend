@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../generated/prisma");
+const session_1 = require("../utils/session");
 const prisma = new prisma_1.PrismaClient();
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -32,6 +33,8 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         yield prisma.user.delete({
             where: { id: userId },
         });
+        // Degrade token after deleting user
+        (0, session_1.degradeToken)(res);
         res.status(204).json({ message: 'user deleted Successfully' });
     }
     catch (error) {
